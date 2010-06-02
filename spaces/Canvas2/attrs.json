@@ -1,8 +1,8 @@
 {
   "name": "Canvas2",
-  "authors": ["dnolan","leejay"],
+  "authors": ["dnolen","ljxia"],
   "icon": "Canvas2.png",
-  "description": "Add a description (this will appear in the Installed Spaces tab in the Console)",
+  "description": "Draw!",
   "tooltip": "Add a tooltip (this will appear when using the Space Menu)",
   "css": "Canvas2.css",
   "shift": { "html": "Canvas2.html" },
