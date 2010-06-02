@@ -1,6 +1,6 @@
 {
   "name": "Canvas2",
-  "authors": ["me"],
+  "authors": ["dnolan","leejay"],
   "icon": "Canvas2.png",
   "description": "Add a description (this will appear in the Installed Spaces tab in the Console)",
   "tooltip": "Add a tooltip (this will appear when using the Space Menu)",
