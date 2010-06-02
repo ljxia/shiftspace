@@ -1,0 +1,12 @@
+{
+  "name": "Canvas2",
+  "authors": ["me"],
+  "icon": "Canvas2.png",
+  "description": "Add a description (this will appear in the Installed Spaces tab in the Console)",
+  "tooltip": "Add a tooltip (this will appear when using the Space Menu)",
+  "css": "Canvas2.css",
+  "shift": { "html": "Canvas2.html" },
+  "version": "0.0",
+  "lib": "lib",
+  "lang": "lang"
+}
