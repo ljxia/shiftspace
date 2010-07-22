@@ -199,13 +199,13 @@ var SSEditShift = function(space, shiftId)
   {
     var content = shift.content;
     SSFocusSpace(space, (content && content.position) || null);
-    SSShowShift(space, shiftId);
-
-    space.editShift(shiftId);
-    space.onShiftEdit(shiftId);
-
-    SSFocusShift(space, shiftId);
-    SSPostNotification('onShiftEdit', shiftId);
+    var controlp = !space.hasShift(shiftId) ? space.addShift(shift, space.shiftUI()) : null;
+    (function(controlp) {
+      space.editShift(shiftId);
+      space.onShiftEdit(shiftId);
+      SSFocusShift(space, shiftId);
+      SSPostNotification('onShiftEdit', shiftId);
+    }.future())(controlp);
   }
   else
   {
@@ -214,7 +214,7 @@ var SSEditShift = function(space, shiftId)
 }.future();
 
 
-function SSLeaveEditShift(space, shiftId)
+function SSEditExitShift(space, shiftId)
 {
   var shift = SSGetShift(shiftId);
   if(space &&
@@ -222,7 +222,7 @@ function SSLeaveEditShift(space, shiftId)
      space.hasShift(shiftId) &&
      space.shiftIsVisible(shiftId))
   {
-    SSShowShift(space, shiftId);
+    space.editExitShift(shiftId);
   }
   SSPostNotification('onShiftLeaveEdit', shiftId);
   SSSetShiftBeingEdited(null);
@@ -259,7 +259,7 @@ function SSSaveNewShift(shift)
           name: shift.space.name,
           version: space.attributes().version
         },
-        summary: shift.summary.trunc(75),
+        summary: shift.summary ? shift.summary.trunc(75) : 'Untitled',
         content: shift
       };
 

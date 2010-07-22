@@ -401,19 +401,21 @@ var ShiftSpaceSpace = new Class({
     var theShift = this.__shifts[shiftId];
     if(!theShift.isBeingEdited())
     {
-      theShift.setIsBeingEdited(true);
+      theShift.__edit__();
       theShift.edit();
+      theShift.__editAfter__();
     }
   },
 
 
-  leaveEditShift: function(shiftId)
+  editExitShift: function(shiftId)
   {
     var theShift = this.__shifts[shiftId];
     if(theShift.isBeingEdited())
     {
-      theShift.setIsBeingEdited(false);
-      theShift.leaveEdit();
+      theShift.__editExit__();
+      theShift.editExit();
+      theShift.__editExitAfter__();
     }
   },
 
@@ -499,13 +501,17 @@ var ShiftSpaceSpace = new Class({
       {
         if(self.getCurrentShift() && theShift != self.getCurrentShift()) self.getCurrentShift().onBlur();
         self.setCurrentShift(theShift);
-
         theShift.__show__();
-        theShift.show();
-        theShift.setIsVisible(true);
-        theShift.setIsBeingEdited(false);
+        if(theShift.isNewShift() && theShift.showNew)
+        {
+          theShift.showNew();
+        }
+        else
+        {
+          theShift.show();
+        }
+        theShift.__showAfter__();
         self.onShiftShow(theShift.getId());
-
         theShift.onFocus();
       }
     }.future())(cShift);
@@ -521,22 +527,19 @@ var ShiftSpaceSpace = new Class({
   hideShift: function(shiftId)
   {
     var cShift = this.__shifts[shiftId];
-
-    if( cShift )
+    if(cShift)
     {
-      if( cShift.canHide() && cShift.isVisible() )
+      if(cShift.canHide() && cShift.isVisible())
       {
-        cShift._hide();
+        cShift.__hide__();
         cShift.hide();
-        cShift.setIsBeingEdited(false);
-        cShift.setIsVisible(false);
+        cShift.__hideAfter__();
       }
     }
     else
     {
       SSLog("Shift " + shiftId + " does not exist in this the " + this.getName() + " space.", SSLogError);
     }
-
     // check to see if there are no visible shifts, if not, hide the space interface
     var visibleShifts = false;
     for(var shift in this.__shifts)
