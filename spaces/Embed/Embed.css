@@ -1,0 +1,42 @@
+/* Your Space and Shift CSS goes here */
+
+.EmbedShift
+{
+  font: 15px courier, monospace;
+  position: absolute;
+  padding:  5px 10px;
+  color: #FFF;
+  background-color: rgba(0,0,0,0.5);
+  left:100px;
+  top:100px;
+  -moz-border-radius: 10px;
+  width: 480px;
+}
+
+.EmbedShift textarea
+{
+  height:340px;
+  width: 470px;
+  margin:10px 0 5px;
+  padding: 5px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+}
+
+.EmbedShift textarea
+{
+  height:340px;
+  width: 470px;
+}
+
+.EmbedShift form
+{
+  width:100%;
+}
+
+.EmbedShift .embedSpaceTabs span{
+  color: #F7F2EF;
+  text-decoration: underline;
+}
+
+/********************* BESPIN *************************/

@@ -1,0 +1,50 @@
+/* Your Space and Shift CSS goes here */
+
+
+body.lulzifySomething img:hover{
+  outline: 2px dotted red;
+}
+
+.LulzifyShift
+{
+  font: 50px verdana sans-serif;
+  position: absolute;
+  padding:  5px 10px 5px 10px;
+  color: #FFF;
+  background-color: #F63B02;
+  left:200px;
+  top:200px;
+  display: none;
+}
+
+.lulzContainer{
+  border: 2px dotted red;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  display: block;
+  position:relative;
+}
+
+.lulzContainer img{
+  display: block;
+  margin: -2px;
+}
+
+.lulzEdit,
+.lulzEdit:focus,
+.lulzShow {
+  background:none repeat scroll 0 0 transparent;
+  border:medium none;
+  font-family:Impact;
+  font-size:25px;
+  width: 94%;
+  height: 94%;
+  margin: 3%;
+  color: white;
+  text-shadow: 1px 1px 1px black;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  overflow: hidden;
+}

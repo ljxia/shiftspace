@@ -59,6 +59,12 @@ String.implement({
     idx = (idx == -1) ? 0 : 7;
     var first = trimmed.substr(idx, trimmed.length).split("/").first();
     return "http://"+first;
+  },
+
+  toElement: function() {
+    var el = Sandalphon.convertToFragment(this);
+    el.getElements("*").addClass("ShiftSpaceElement");
+    return el;
   }
 });
 
@@ -519,6 +525,33 @@ var DelayedAsset = new Class({
     }
   }
 });
+
+var SSCompiledTemplateSettings = {
+  start       : '<%',
+  end         : '%>',
+  interpolate : /<%=(.+?)%>/g
+};
+
+/* From Underscore.js Template */
+(function() {
+var escapeRegExp = function(s) { return s.replace(/([.*+?^${}()|[\]\/\\])/g, '\\$1'); };
+this.SSCompileHtmlTemplate = function SSCompileHtmlTemplate(str, data) {
+  var c  = SSCompiledTemplateSettings;;
+  var endMatch = new RegExp("'(?=[^"+c.end.substr(0, 1)+"]*"+escapeRegExp(c.end)+")","g");
+  var fn = new Function('obj',
+                        'var p=[],print=function(){p.push.apply(p,arguments);};' +
+                        'with(obj){p.push(\'' +
+                        str.replace(/[\r\t\n]/g, " ")
+                        .replace(endMatch,"\t")
+                        .split("'").join("\\'")
+                        .split("\t").join("'")
+                        .replace(c.interpolate, "',$1,'")
+                        .split(c.start).join("');")
+                        .split(c.end).join("p.push('")
+                        + "');}return p.join('');");
+  return data ? fn(data) : fn;
+};
+})();
 
 var _ = Function._;
 var $msg = Function.msg;

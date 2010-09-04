@@ -420,7 +420,10 @@ var ShiftSpace = new (function() {
        '__sys__',
        'SSShiftBeingEdited',
        'SSAllShiftsForSpace',
-       'SSSpaceShouldAutolaunch'
+       'SSSpaceShouldAutolaunch',
+       'SSCompileHtmlTemplate',
+       'SSProcessSpaceAttributes',
+       'Future'
        ].each(function(sym) {
          unsafeWindow[sym] = eval(sym);
        });
@@ -457,4 +460,3 @@ ShiftSpace.__externals = {
     return result;
   }
 };
-

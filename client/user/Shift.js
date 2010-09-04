@@ -48,12 +48,22 @@ var ShiftSpaceShift = new Class({
     this.setTitle(data.summary || '');
 
     var mv = this.getMainView();
-    if(mv && mv.getParent() == null)
+    if(mv && mv.getParent() == null) $(document.body).grab(mv);
+
+    var css = $get(this.attributes(), 'ui', 'shift', 'css');
+    if(css && !$(this.attributes().name+'ShiftCss'))
     {
-      $(document.body).grab(mv);
+      SSAddStyle(this.attributes().ui.shift.css, {
+        rewriteUrls: SSCalcRewriteUrl(this.attributes().ui.shift.cssUrl)
+      });
     }
 
     this.setup(data.content);
+  },
+
+  attributes: function()
+  {
+    return this.getParentSpace().attributes();
   },
   
   /*
@@ -122,19 +132,56 @@ var ShiftSpaceShift = new Class({
   },
 
   /*
+    Function: _edit
+      *private*
+      Private method for setting state when entering edit mode.
+   */
+  __edit__: function()
+  {
+    this.setIsBeingEdited(true);
+    this.setIsVisible(true);
+  },
+
+  /*
     Function: edit
       The shift should present it's editing interface.  Puts the shift into editing mode.  Be sure to call this.parent()
       if you override this method.
   */
   edit: function() 
   {
-    this.setIsBeingEdited(true);
   },
 
-  
-  leaveEdit: function()
+  __editAfter__: function()
+  {
+    
+  },
+
+  /*
+    Function: _editExit
+      *private*
+      Private method for setting state when leaving edit mode.
+   */
+  __editExit__: function()
   {
     this.setIsBeingEdited(false);
+  },
+  
+  /*
+    Function: editExit
+      The shift should leave it's editing interface.
+   */
+  editExit: function()
+  {
+  },
+
+  /*
+    Function: __editExitAfter__
+      *private*
+      Private method run after editExit is called.
+   */
+  __editExitAfter__: function()
+  {
+    
   },
 
   /*
@@ -235,7 +282,18 @@ var ShiftSpaceShift = new Class({
 
   __show__: function()
   {
+    this.setIsVisible(true);
+    var mainView = this.getMainView();
+    if(mainView)
+    {
+      mainView.removeClass('SSDisplayNone');
+    }
+    this.refresh();
+  },
 
+  __showAfter__: function()
+  {
+    this.fireEvent('onShiftShow', this.getId());    
   },
 
   /*
@@ -244,21 +302,22 @@ var ShiftSpaceShift = new Class({
   */
   show: function()
   {
-    this.setIsVisible(true);
-    var mainView = this.getMainView();
-
-    if(mainView)
-    {
-      mainView.removeClass('SSDisplayNone');
-    }
-
-    this.refresh();
-    this.fireEvent('onShiftShow', this.getId());
   },
 
-  _hide: function()
+  /*
+    Function: __hide__
+      *private*
+      Private pre hide for setting hidden state information.
+   */
+  __hide__: function()
   {
-
+    this.setIsVisible(false);
+    this.setIsBeingEdited(false);
+    var mainView = this.getMainView();
+    if(mainView)
+    {
+      mainView.addClass('SSDisplayNone');
+    }
   },
 
   /*
@@ -267,14 +326,15 @@ var ShiftSpaceShift = new Class({
   */
   hide: function(el)
   {
-    this.setIsVisible(false);
-    var mainView = this.getMainView();
+  },
 
-    if(mainView)
-    {
-      mainView.addClass('SSDisplayNone');
-    }
-
+  /*
+    Function: __hideAfter__
+      *private*
+      Private after hide function.
+   */
+  __hideAfter__: function(el)
+  {
     this.fireEvent('onShiftHide', this.getId());
   },
 
@@ -292,7 +352,9 @@ var ShiftSpaceShift = new Class({
     {
       this.mainView = el;
       this.mainView.addEvent('mousedown', function() {
+        this.__focus__();
         this.focus();
+        this.__focusAfter__();
       }.bind(this));
     }
     else
@@ -302,19 +364,47 @@ var ShiftSpaceShift = new Class({
   },
 
   /*
+    Function: __focus__
+      *private*
+   */
+  __focus__: function()
+  {
+    
+  },
+
+  /*
     Function: focus
       Tell ShiftSpace we want to focus this shift.
   */
   focus: function() 
   {
-    this.fireEvent('onShiftFocus', this.getId() );
+
+  },
+
+  /*
+    Function: __focusAfter__
+      *private*
+   */
+  __focusAfter__: function()
+  {
+    this.fireEvent('onShiftFocus', this.getId() );    
   },
 
   /*
     Function: onFocus
+      *private*
       Do any updating of the shift's interface for focus events here.
   */
   onFocus: function() {},
+
+  /*
+    Function: __blur__
+      *private*
+   */
+  __blur__: function()
+  {
+    this.setIsBeingEdited(false);    
+  },
 
   /*
     Function: unfocus
@@ -322,8 +412,15 @@ var ShiftSpaceShift = new Class({
   */
   blur : function() 
   {
-    this.setIsBeingEdited(false);
-    this.fireEvent('onShiftBlur', this.getId() );
+  },
+
+  /*
+    Function: __blurAfter__
+      *private*
+   */
+  __blurAfter__: function()
+  {
+    this.fireEvent('onShiftBlur', this.getId() );    
   },
 
   /*
@@ -854,5 +951,11 @@ var ShiftSpaceShift = new Class({
   getUserId: function()
   {
     return ShiftSpace.User.getId();
+  },
+
+  
+  template: function(name, ctxt)
+  {
+    return this.getParentSpace().template(name, ctxt);
   }
 });

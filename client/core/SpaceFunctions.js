@@ -36,8 +36,9 @@ Returns:
 */
 var SSLoadSpace = function(spaceName, inline)
 {
-  var url = String.urlJoin(SSURLForSpace(spaceName), spaceName + '.js');
-  var attrs = SSGetSpaceAttributes(spaceName);
+  var url = String.urlJoin(SSURLForSpace(spaceName), spaceName + '.js'),
+      attrs = SSGetSpaceAttributes(spaceName),
+      origAttrs = attrs;
 
   if(!attrs)
   {
@@ -56,13 +57,8 @@ var SSLoadSpace = function(spaceName, inline)
   {
     codep = new Promise(new DelayedAsset("javascript", url));
   }
-  var cssp = {data:1}; // horrible hack - David
-  if(!$(document.head).getElement(["#",spaceName,"Css"].join("")))
-  {
-    cssp = SSLoadStyle(attrs.css, null, SSSpaceIsInDebugMode(spaceName));
-  }
-
-  var spacep = $if($and(SSApp.noErr(codep), SSApp.noErr(cssp)),
+  attrs = SSProcessSpaceAttributes(attrs);
+  var spacep = $if($and(SSApp.noErr(codep), SSApp.noErr(attrs)),
                    function() {
                      try
                      {
@@ -84,13 +80,42 @@ var SSLoadSpace = function(spaceName, inline)
                        if(!spacector)
                        {
                          spacector = ShiftSpace.Space;
-                         SSLog("Could not find a constructor for " + spaceName + ", using default Space constructor", SSLogWarning);
                        }
                        if(!shiftctor)
                        {
                          throw new Error(
                            spaceName + "Shift constructor does not exist! Did you specify the proper shift class name in your attrs.json file?"
                          );
+                       }
+                       if(Promise.isPromise(attrs)) {
+                         attrs = attrs.value();                         
+                       }
+                       // preserve the old css urls for later rewriting
+                       if($get(origAttrs, 'ui'))
+                       {
+                         $H(origAttrs.ui).each(function(v, k) {
+                           if(v.css) {
+                             attrs.ui[k].cssUrl = origAttrs.ui[k].css;
+                           }
+                         });
+                       }
+                       // add the css
+                       if($get(attrs, 'ui', 'space', 'css') && !$(document.head).getElement(["#",spaceName,"Css"].join("")))
+                       {
+                         SSAddStyle(attrs.ui.space.css, {
+                           rewriteUrls: SSCalcRewriteUrl(origAttrs.ui.space.css)
+                         });
+                       } else {
+                       }
+                       // create any ui templates
+                       if($get(attrs, 'ui'))
+                       {
+                         attrs.ui = $H(attrs.ui).map(function(v, k) {
+                           if(v.html) {
+                             v.template = SSCompileHtmlTemplate(v.html);
+                           }
+                           return v;
+                         }).getClean();
                        }
                        spacector.implement({attributes:function(){return attrs;}});
                        var space = __spaces[spaceName] = new spacector(shiftctor);
@@ -129,7 +154,7 @@ function SSRegisterSpace(instance)
 
   instance.addEvent('onShiftHide', function(id) {
     SSPostNotification('onShiftHide', id);
-    SSLeaveEditShift(SSSpaceForShift(id), id);
+    SSEditExitShift(SSSpaceForShift(id), id);
   });
   instance.addEvent('onShiftShow', function(id) {
     SSPostNotification('onShiftShow', id);
@@ -137,7 +162,7 @@ function SSRegisterSpace(instance)
   instance.addEvent('onShiftBlur', function(id) {
     SSBlurShift(SSSpaceForShift(id), id);
     SSPostNotification('onShiftBlur', id);
-    SSLeaveEditShift(SSSpaceForShift(id), id);
+    SSEditExitShift(SSSpaceForShift(id), id);
   });
   instance.addEvent('onShiftFocus', function(id) {
     SSFocusShift(SSSpaceForShift(id), id);
@@ -230,9 +255,15 @@ function SSLoadSpaceAttributes(spaceName)
                  if (!json.icon) json.icon = String.urlJoin(json.url, json.name + '.png');
                  // clear whitespace
                  if(json.icon) json.icon = json.icon.trim();
-                 if(json.css) json.css = json.css.trim();
                  if(!SSIsAbsoluteURL(json.icon)) json.icon = String.urlJoin(json.url, json.icon);
-                 if(!SSIsAbsoluteURL(json.css)) json.css = String.urlJoin(json.url, json.css);
+                 json.ui = $treeMap(json.ui, function(v, k) {
+                   if((k == "html" || k == "css") && !SSIsAbsoluteURL(v)) {
+                     v = v.trim();
+                     return String.urlJoin(json.url, v);
+                   } else {
+                     return v;
+                   }
+                 });
                  // position default to end
                  json.position = $H(SSInstalledSpaces()).getLength();
                  return json;
@@ -256,6 +287,34 @@ function SSGetSpaceAttributes(spaceName)
 }
 
 /*
+Function: SSProcessSpaceAattributes
+  Takes a space's attributes and returns a new object with promises
+  for the ui entries if they exist.
+*/
+function SSProcessSpaceAttributes(attrs)
+{
+  if(attrs.ui)
+  {
+    attrs = $H(attrs);
+    attrs.ui = $H(attrs.ui).map(function(v, k) {
+      return $treeMap(v, function(path, type) {
+        if(type == "html" || type == "css")
+        {
+          return new Promise(SSLoadFile(path), {lazy: true});
+        }
+        else
+        {
+          return path;
+        }
+      });
+    }).getClean();
+    return new Promise(attrs.getClean());
+  } else {
+    return attrs;
+  }
+}
+
+/*
 Function: SSInstallSpace
   Loads the JavaScript source of a Space, then loads the space into memory.
   The source URL is saved in the 'installed' object for future reference.
@@ -275,7 +334,7 @@ function SSInstallSpace(space)
           var attrs = p.value();
           if(!attrs)
           {
-            var attrs = {
+            attrs = {
               url: url, 
               name: space, 
               position: count, 
