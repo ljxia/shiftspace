@@ -300,7 +300,7 @@ def installdeps():
     Run the dependency install scripts for the appropiate platform.
     """
     platform = sys.platform
-    if not os.path.exists("tmp/deps"):
+    if not os.path.exists("tmp/deps2"):
         os.system("scripts/download_deps.sh")
     if platform == "darwin":
         os.system("scripts/install_deps.sh")
