@@ -235,8 +235,10 @@ var ShiftSpaceShift = new Class({
   */
   encode: function()
   {
-    if(this.getMainView()) return {position: this.getPosition()};
-    return {};
+    var result = {};
+    if(this.getMainView()) result = {position: this.getPosition()};
+    if(!result.summary) result.summary = "Untitled";
+    return result;
   },
 
   /*
@@ -340,6 +342,23 @@ var ShiftSpaceShift = new Class({
   __hideAfter__: function(el)
   {
     this.fireEvent('onShiftHide', this.getId());
+  },
+
+  /*
+    Function: cancel
+      Function to cancel the editing of a shift as
+      well destroying a newly created shift.
+   */
+  cancel: function()
+  {
+    if(this.isNewShift())
+    {
+      this.destroy();
+    }
+    else
+    {
+      this.getParentSpace().hideShift(this.getId());
+    }
   },
 
   /*

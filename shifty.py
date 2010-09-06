@@ -210,6 +210,7 @@ def createSpace(name):
                         os.path.join(dirpath, "lib"))
         shutil.copytree(os.path.join(tmplpath, "lang"),
                         os.path.join(dirpath, "lang"))
+        installSpace(name)
     else:
         print "Error: A space called %s already exists" % name
 
@@ -300,7 +301,7 @@ def installdeps():
     Run the dependency install scripts for the appropiate platform.
     """
     platform = sys.platform
-    if not os.path.exists("tmp/deps"):
+    if not os.path.exists("tmp/deps2"):
         os.system("scripts/download_deps.sh")
     if platform == "darwin":
         os.system("scripts/install_deps.sh")
