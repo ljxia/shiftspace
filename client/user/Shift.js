@@ -61,6 +61,11 @@ var ShiftSpaceShift = new Class({
     this.setup(data.content);
   },
 
+  url: function()
+  {
+    return SSURLForSpace(this.getParentSpace().attributes().name);
+  },
+
   genUUID: function() {
     return SSGenUUID();
   },
